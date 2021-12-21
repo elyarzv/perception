@@ -1,0 +1,4 @@
+export ROS_DISTRO=noetic
+export PROJECT=phoenix1-perception
+source /opt/ros/${ROS_DISTRO}/setup.bash 
+source ${HOME}/robot_ws/install/setup.bash 
