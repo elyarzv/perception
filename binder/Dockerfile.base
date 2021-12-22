@@ -15,6 +15,7 @@ ARG ROS_IP=localhost
 ARG ROS_HOSTNAME=localhost
 
 ADD robot_ws /opt/robot_ws
+ADD binder/models /opt/models
 
 ARG PROJECT
 ENV HOME_DIR /opt
