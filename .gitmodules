@@ -1,8 +1,6 @@
 [submodule "binder/robot_ws/src/phoenix1_perception"]
 	path = binder/robot_ws/src/phoenix1_perception
 	url = git@bitbucket.org:ais_admin/phoenix1_perception.git
-	branch = master
 [submodule "binder/models"]
 	path = binder/models
 	url = https://github.com/tensorflow/models.git
-	branch = master
