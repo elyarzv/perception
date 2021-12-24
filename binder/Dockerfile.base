@@ -66,6 +66,9 @@ RUN apt-get update && apt-get install -y \
 RUN rosdep init
 RUN rosdep update
 
+# RUN cd /opt/models
+RUN (cd /opt/models/research && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py --force-reinstall && protoc object_detection/protos/*.proto --python_out=. && cp object_detection/packages/tf2/setup.py . && python3 -m pip install --use-feature=2020-resolver .)
+
 ARG PROJECT
 ENV HOME_DIR /opt
 ENV WORKSPACE ${HOME_DIR}'/'${PROJECT}
