@@ -20,24 +20,16 @@ build: ## Build the project in debug mode
 	/bin/bash -c ' \
 		. /opt/ros/${ROS_DISTRO}/setup.bash && \
 		cd ${WS_SRC} && \
-		colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug && \
-		. install/setup.bash'	
+		catkin_make && \
+		. devel/setup.bash'	
 
 .PHONY: build-robot-workspace
 build-robot-workspace: ## Build the robot workspace in debug mode
 	/bin/bash -c ' \
 		. /opt/ros/${ROS_DISTRO}/setup.bash && \
 		cd robot_ws && \
-		colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug && \
-		. install/setup.bash'	
-
-.PHONY: build-simulation-workspace
-build-simulation-workspace: ## Build the robot workspace in debug mode
-	/bin/bash -c ' \
-		. /opt/ros/${ROS_DISTRO}/setup.bash && \
-		cd simulation_ws && \
-		colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug && \
-		. install/setup.bash'	
+		catkin_make && \
+		. devel/setup.bash'		
 
 .PHONY: build-rs
 build-rs: build-robot-workspace build-simulation-workspace
@@ -314,7 +306,7 @@ docker-start-dev: .upd-params docker-stop-dev
 	--env GROUP=${USER} \
 	--env USER_ID=`id -u ${USER}` \
 	--env GROUP_ID=`getent group ${USER} | awk -F: '{printf $$3}'` \
-	--env-file ./binder/${PROJECT}-fleet-management/${ROBOT_NAME}.env \
+	--env-file ./binder/phoenix1-fleet-management/${ROBOT_NAME}.env \
 	-v /dev:/dev \
 	-v /tmp/.X11-unix:/tmp/.X11-unix \
 	-v $${PWD}:/home/${USER} \

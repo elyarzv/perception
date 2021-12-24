@@ -1,0 +1,25 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+WORKDIR /opt
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+ARG PROJECT
+ENV HOME_DIR /root
+ENV WORKSPACE ${HOME_DIR}'/'${PROJECT}
+
+# Copy project
+ADD robot_ws ${WORKSPACE}/robot_ws
+RUN mkdir -p ${WORKSPACE}
+
+WORKDIR ${WORKSPACE}
+
+COPY binder/dev/bashrc /tmp/bashrc
+COPY binder/dev/Makefile /root/phoenix1/Makefile
+COPY binder/dev/Makefile ${HOME}/${PROJECT}/Makefile
+
+COPY binder/dev/workspace.sh /opt/${PROJECT}/.env.sh
+COPY binder/ade/entrypoint /tmp/entrypoint
+ENTRYPOINT ["/tmp/entrypoint"]
+CMD ["/bin/sh", "-c", "trap 'exit 147' TERM; tail -f /dev/null & wait ${!}"]
