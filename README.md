@@ -1,104 +1,15 @@
-# Phoenix binder
-
----
-## Phoenix binder structure
-
-├── binder  
-│   ├── binder/[ade](https://ade-cli.readthedocs.io/en/latest/index.html) ADE docker based tool to ensure that all developers have the same environment  
-│   │   ├── binder/ade/[entrypoint](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/ade/entrypoint) entrypoint for Dockerfile compatible with ADE   
-│   │   └── binder/ade/[env.sh](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/ade/env.sh)   
-│   ├── binder/base  Requirements for building base docker image   
-│   │   └── binder/base/[mt_software_suite_linux-x64_2021.0](https://content.xsens.com/mt-software-suite-download?hsCtaTracking=e7ef7e11-db88-4d9e-b36e-3f937ea4ae15%7Cd6a8454e-6db4-41e7-9f81-f8fc1c4891b3) Xsens software IMU SDK  
-│   ├── binder/dev Requirements for building development docker image   
-│   │   ├── binder/dev/bashrc  
-│   │   └── binder/dev/workspace.sh  
-│   ├── binder/[Dockerfile.base](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/Dockerfile.base)  Dockerfile for base image    
-│   ├── binder/[Dockerfile.dev](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/Dockerfile.dev)  Dockerfile for development (and for building code for the production image)    
-│   ├── binder/[Dockerfile.prod](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/Dockerfile.prod) Dockerfile for production      (no source code on robot)      
-│   ├── binder/prod Requirements for building development docker image   
-│   │   └── binder/prod/entrypoint  
-│   ├── binder/[README.md](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/README.md)  
-│   └── binder/underlay_ws Worspace use to catch all dependencies that are not actively developed in this project or are used from another source eg. Github   
-│       ├── binder/underlay_ws/[README.md](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/underlay_ws/README.md)  
-│       └── binder/underlay_ws/src  
-│           ├── binder/underlay_ws/src/[ais-bigtop-rosbags](https://bitbucket.org/ais_admin/ais-bigtop-rosbags/src/master/)  For automatic recording of rosbags during missions     
-│           ├── binder/underlay_ws/src/[ira_laser_tools](https://github.com/iralabdisco/ira_laser_tools)  Provides the node to merge two laser scans      
-│           └── binder/underlay_ws/src/phoenix1_drivers  
-|               └── binder/underlay_ws/src/phoenix1_drivers/[xsens_ros_mti_driver](https://bitbucket.org/ais_admin/xsens_ros_mti_driver/src/master/)   
-├── [CHANGELOG.md](https://bitbucket.org/ais_admin/phoenix-binder/src/main/CHANGELOG.md)  
-├── [Makefile](https://bitbucket.org/ais_admin/phoenix-binder/src/main/Makefile)  Provides helpful commands for developers and build tools     
-├── [README.md](https://bitbucket.org/ais_admin/phoenix-binder/src/main/README.md)  
-├── codepipeline Set of scripts to run pipelines with AWS codebuild and codepipeline   
-├── robot_ws Workspace that is used to develop the production software that goes in the robot   
-│   └── robot_ws/src  
-│       ├── robot_ws/src/[ais_dimming_module](https://bitbucket.org/ais_admin/ais_dimming_module/src/main/)  Controls the individual dimming of the lamps      
-│       ├── robot_ws/src/[ais_utilities](https://bitbucket.org/ais_admin/ais_utilities/src/master/)  Utility package for writing code tests     
-│       ├── robot_ws/src/[ais_cru_manager](https://bitbucket.org/ais_admin/ais_cru_manager/src/master/)  Package to provide service that advertises the CRU name      
-│       ├── robot_ws/src/[ais_job_manager](https://bitbucket.org/ais_admin/ais_job_manager/src/master/)  Lists and saves missions     
-│       ├── robot_ws/src/[ais_safety](https://bitbucket.org/ais_admin/ais_safety/src/master/)  Safety node for collision avoidance     
-│       ├── robot_ws/src/[ais_messages](https://bitbucket.org/ais_admin/ais_messages/src/noetic-devel/)  Contains custom messages used across AIS     
-│       ├── robot_ws/src/[ais_state_machine](https://bitbucket.org/ais_admin/ais_state_machine/src/main/)  State machine and autonomy logic     
-│       ├── robot_ws/src/[ais_led_strip_controller](https://bitbucket.org/ais_admin/ais_led_strip_controller/src/main/)  Controller for LED strips      
-│       ├── robot_ws/src/[amr_localization](https://bitbucket.org/ais_admin/amr_localization/src/master/)  Localization package providing 1D on-rail localization      
-│       ├── robot_ws/src/[phoenix1_bringup](https://bitbucket.org/ais_admin/phoenix1_bringup/src/main/)  Bringup package containing configuration and launch files to start the robot      
-│       ├── robot_ws/src/[phoenix1_parameters](https://bitbucket.org/ais_admin/phoenix1_parameters/src/main/)  Robot dimensions and safety parameters used by ais_safety      
-│       ├── robot_ws/src/[phoenix_visualization](https://bitbucket.org/ais_admin/phoenix_visualization/src/main/)  Simulation components     
-│       └── robot_ws/src/[phoenix_vehicle_model](https://bitbucket.org/ais_admin/phoenix_vehicle_model/src/main/)  Vehical model used in simualtion      
-└── simulation_ws Workspace that is used alongside the robot_ws to develop the simulation environment, ther rule of thumb is that if it is not going to be used in the robot goes in the simulation_ws    
-    └── simulation_ws/src  
-        └── simulation_ws/src/[phoenix1_simulation](https://bitbucket.org/ais_admin/phoenix1_simulation/src/main/)  Simulation bringup package
----
-
-# Simulation
-
-In order to develop inside the container with the share volumes on the host export to variables `SIMULATION=true` and `DEVELOPING=true` the logic behind can be found [here](https://bitbucket.org/ais_admin/phoenix1_bringup/src/8ebc7848f5a46b07551bf58778eba8c24908ad75/scripts/run_bringup.bash#lines-9)  
-
-- If you are running the simulation for the first time, please update the docker image.
-```
-make docker-update-dev
-```
-
-- If you have an NVIDIA GPU on your computer, run this commands under the ais-binders folder:
-```
-make docker-start-sim
-```
-
-- Otherwise, run:
-```
-make docker-start-sim-cpu
-```
-
-- To stop the simulation, run:
-```
-make docker-stop-dev
-```
-
+# Phoenix-perception-binder
 # Development Workflow
 - Run these commands inside the phoenix binder folder:
 ```
 make docker-start-dev
 make docker-enter-dev
 make build
-source install/setup.bash
+source devel/setup.bash
 ```
 - Stop the Docker container when you are done:
 ```
 make docker-stop-dev
-```
-
-# Production Workflow
-- [Install Docker Compose](https://docs.docker.com/compose/install/) if you have not.
-- [Clone the Deploy Phoenix](https://bitbucket.org/ais_admin/deploy-phoenix/src/master/)
-- Inside the deploy-phoenix
-  - First login to the ECR registry (https://ais-ugv2.atlassian.net/wiki/spaces/ADE/pages/2907340808/AWS+ECR+Docker+registry)
-
-Then use this commands to start the container in the robot
-
-``` 
-make docker-login
-make start
-make enter
-tmux a
 ```
 
 # Building and Pushing Docker Images
