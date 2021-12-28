@@ -1,45 +1,216 @@
-**Edit a file, create a new file, and clone from Bitbucket in under 2 minutes**
-
-When you're done, you can delete the content in this README and update the file with details for others getting started with your repository.
-
-*We recommend that you open this README in another tab as you perform the tasks below. You can [watch our video](https://youtu.be/0ocf7u76WSo) for a full demo of all the steps in this tutorial. Open the video in a new tab to avoid leaving Bitbucket.*
+# Phoenix binder
 
 ---
+## Phoenix binder structure
 
-## Edit a file
-
-You’ll start by editing this README file to learn how to edit a file in Bitbucket.
-
-1. Click **Source** on the left side.
-2. Click the README.md link from the list of files.
-3. Click the **Edit** button.
-4. Delete the following text: *Delete this line to make a change to the README from Bitbucket.*
-5. After making your change, click **Commit** and then **Commit** again in the dialog. The commit page will open and you’ll see the change you just made.
-6. Go back to the **Source** page.
-
+├── binder  
+│   ├── binder/[ade](https://ade-cli.readthedocs.io/en/latest/index.html) ADE docker based tool to ensure that all developers have the same environment  
+│   │   ├── binder/ade/[entrypoint](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/ade/entrypoint) entrypoint for Dockerfile compatible with ADE   
+│   │   └── binder/ade/[env.sh](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/ade/env.sh)   
+│   ├── binder/base  Requirements for building base docker image   
+│   │   └── binder/base/[mt_software_suite_linux-x64_2021.0](https://content.xsens.com/mt-software-suite-download?hsCtaTracking=e7ef7e11-db88-4d9e-b36e-3f937ea4ae15%7Cd6a8454e-6db4-41e7-9f81-f8fc1c4891b3) Xsens software IMU SDK  
+│   ├── binder/dev Requirements for building development docker image   
+│   │   ├── binder/dev/bashrc  
+│   │   └── binder/dev/workspace.sh  
+│   ├── binder/[Dockerfile.base](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/Dockerfile.base)  Dockerfile for base image    
+│   ├── binder/[Dockerfile.dev](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/Dockerfile.dev)  Dockerfile for development (and for building code for the production image)    
+│   ├── binder/[Dockerfile.prod](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/Dockerfile.prod) Dockerfile for production      (no source code on robot)      
+│   ├── binder/prod Requirements for building development docker image   
+│   │   └── binder/prod/entrypoint  
+│   ├── binder/[README.md](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/README.md)  
+│   └── binder/underlay_ws Worspace use to catch all dependencies that are not actively developed in this project or are used from another source eg. Github   
+│       ├── binder/underlay_ws/[README.md](https://bitbucket.org/ais_admin/phoenix-binder/src/main/binder/underlay_ws/README.md)  
+│       └── binder/underlay_ws/src  
+│           ├── binder/underlay_ws/src/[ais-bigtop-rosbags](https://bitbucket.org/ais_admin/ais-bigtop-rosbags/src/master/)  For automatic recording of rosbags during missions     
+│           ├── binder/underlay_ws/src/[ira_laser_tools](https://github.com/iralabdisco/ira_laser_tools)  Provides the node to merge two laser scans      
+│           └── binder/underlay_ws/src/phoenix1_drivers  
+|               └── binder/underlay_ws/src/phoenix1_drivers/[xsens_ros_mti_driver](https://bitbucket.org/ais_admin/xsens_ros_mti_driver/src/master/)   
+├── [CHANGELOG.md](https://bitbucket.org/ais_admin/phoenix-binder/src/main/CHANGELOG.md)  
+├── [Makefile](https://bitbucket.org/ais_admin/phoenix-binder/src/main/Makefile)  Provides helpful commands for developers and build tools     
+├── [README.md](https://bitbucket.org/ais_admin/phoenix-binder/src/main/README.md)  
+├── codepipeline Set of scripts to run pipelines with AWS codebuild and codepipeline   
+├── robot_ws Workspace that is used to develop the production software that goes in the robot   
+│   └── robot_ws/src  
+│       ├── robot_ws/src/[ais_dimming_module](https://bitbucket.org/ais_admin/ais_dimming_module/src/main/)  Controls the individual dimming of the lamps      
+│       ├── robot_ws/src/[ais_utilities](https://bitbucket.org/ais_admin/ais_utilities/src/master/)  Utility package for writing code tests     
+│       ├── robot_ws/src/[ais_cru_manager](https://bitbucket.org/ais_admin/ais_cru_manager/src/master/)  Package to provide service that advertises the CRU name      
+│       ├── robot_ws/src/[ais_job_manager](https://bitbucket.org/ais_admin/ais_job_manager/src/master/)  Lists and saves missions     
+│       ├── robot_ws/src/[ais_safety](https://bitbucket.org/ais_admin/ais_safety/src/master/)  Safety node for collision avoidance     
+│       ├── robot_ws/src/[ais_messages](https://bitbucket.org/ais_admin/ais_messages/src/noetic-devel/)  Contains custom messages used across AIS     
+│       ├── robot_ws/src/[ais_state_machine](https://bitbucket.org/ais_admin/ais_state_machine/src/main/)  State machine and autonomy logic     
+│       ├── robot_ws/src/[ais_led_strip_controller](https://bitbucket.org/ais_admin/ais_led_strip_controller/src/main/)  Controller for LED strips      
+│       ├── robot_ws/src/[amr_localization](https://bitbucket.org/ais_admin/amr_localization/src/master/)  Localization package providing 1D on-rail localization      
+│       ├── robot_ws/src/[phoenix1_bringup](https://bitbucket.org/ais_admin/phoenix1_bringup/src/main/)  Bringup package containing configuration and launch files to start the robot      
+│       ├── robot_ws/src/[phoenix1_parameters](https://bitbucket.org/ais_admin/phoenix1_parameters/src/main/)  Robot dimensions and safety parameters used by ais_safety      
+│       ├── robot_ws/src/[phoenix_visualization](https://bitbucket.org/ais_admin/phoenix_visualization/src/main/)  Simulation components     
+│       └── robot_ws/src/[phoenix_vehicle_model](https://bitbucket.org/ais_admin/phoenix_vehicle_model/src/main/)  Vehical model used in simualtion      
+└── simulation_ws Workspace that is used alongside the robot_ws to develop the simulation environment, ther rule of thumb is that if it is not going to be used in the robot goes in the simulation_ws    
+    └── simulation_ws/src  
+        └── simulation_ws/src/[phoenix1_simulation](https://bitbucket.org/ais_admin/phoenix1_simulation/src/main/)  Simulation bringup package
 ---
 
-## Create a file
+# Simulation
 
-Next, you’ll add a new file to this repository.
+In order to develop inside the container with the share volumes on the host export to variables `SIMULATION=true` and `DEVELOPING=true` the logic behind can be found [here](https://bitbucket.org/ais_admin/phoenix1_bringup/src/8ebc7848f5a46b07551bf58778eba8c24908ad75/scripts/run_bringup.bash#lines-9)  
 
-1. Click the **New file** button at the top of the **Source** page.
-2. Give the file a filename of **contributors.txt**.
-3. Enter your name in the empty file space.
-4. Click **Commit** and then **Commit** again in the dialog.
-5. Go back to the **Source** page.
+- If you are running the simulation for the first time, please update the docker image.
+```
+make docker-update-dev
+```
 
-Before you move on, go ahead and explore the repository. You've already seen the **Source** page, but check out the **Commits**, **Branches**, and **Settings** pages.
+- If you have an NVIDIA GPU on your computer, run this commands under the ais-binders folder:
+```
+make docker-start-sim
+```
 
----
+- Otherwise, run:
+```
+make docker-start-sim-cpu
+```
 
-## Clone a repository
+- To stop the simulation, run:
+```
+make docker-stop-dev
+```
 
-Use these steps to clone from SourceTree, our client for using the repository command-line free. Cloning allows you to work on your files locally. If you don't yet have SourceTree, [download and install first](https://www.sourcetreeapp.com/). If you prefer to clone from the command line, see [Clone a repository](https://confluence.atlassian.com/x/4whODQ).
+# Development Workflow
+- Run these commands inside the phoenix binder folder:
+```
+make docker-start-dev
+make docker-enter-dev
+make build
+source install/setup.bash
+```
+- Stop the Docker container when you are done:
+```
+make docker-stop-dev
+```
 
-1. You’ll see the clone button under the **Source** heading. Click that button.
-2. Now click **Check out in SourceTree**. You may need to create a SourceTree account or log in.
-3. When you see the **Clone New** dialog in SourceTree, update the destination path and name if you’d like to and then click **Clone**.
-4. Open the directory you just created to see your repository’s files.
+# Production Workflow
+- [Install Docker Compose](https://docs.docker.com/compose/install/) if you have not.
+- [Clone the Deploy Phoenix](https://bitbucket.org/ais_admin/deploy-phoenix/src/master/)
+- Inside the deploy-phoenix
+  - First login to the ECR registry (https://ais-ugv2.atlassian.net/wiki/spaces/ADE/pages/2907340808/AWS+ECR+Docker+registry)
 
-Now that you're more familiar with your Bitbucket repository, go ahead and add a new file locally. You can [push your change back to Bitbucket with SourceTree](https://confluence.atlassian.com/x/iqyBMg), or you can [add, commit,](https://confluence.atlassian.com/x/8QhODQ) and [push from the command line](https://confluence.atlassian.com/x/NQ0zDQ).
+Then use this commands to start the container in the robot
+
+``` 
+make docker-login
+make start
+make enter
+tmux a
+```
+
+# Building and Pushing Docker Images
+
+```
+make src-update-submodules
+make docker-build-base
+make docker-push-base
+make docker-build-dev
+make docker-push-dev
+make docker-build-prod
+make docker-push-prod
+```
+
+# Running Docker Containers
+
+- Running the base Docker image:
+```
+   make docker-start-base
+```
+- Running the development Docker image:
+```
+   make docker-start-dev
+```
+- Running the production Docker image:
+```
+   make docker-start-prod
+```
+
+# Opening a terminal on Docker Containers
+
+- Entering the base Docker container:
+```
+   make docker-enter-base
+```
+- Entering the development Docker container:
+```
+   make docker-enter-dev
+```
+- Entering the production Docker container:
+```
+   make docker-enter-prod
+```
+
+# Stopping Docker Containers
+
+- Stopping the base Docker container:
+```
+   make docker-stop-base
+```
+- Stopping the development Docker container:
+```
+   make docker-stop-dev
+```
+- Stopping the production Docker container:
+```
+   make docker-stop-prod
+```
+
+# Developing inside the container as $USER for the robot
+- Build the whole workspace
+```
+export TAG=develop* --> Please take a look at the section after developing for the simulation
+export ROBOT_NAME=condor
+make docker-pull-dev --> Skip this step if you want to use your local image
+make make docker-start-robot-cpu --> Use TAG=local if you built the image locally
+make docker-enter-dev
+make build-robot-workspace
+source robot_ws/install/setup.bash
+make build-simulation-workspace
+source simulation_ws/install/setup.bash
+export SIMULATION=false
+export DEVELOPING=true
+roslaunch phoenix1_bringup bringup.launch
+```
+
+# Developing inside the container as $USER for the simulation
+- Build the whole workspace
+```
+export TAG=develop* --> Please take a look at the next section
+export ROBOT_NAME=condor
+make docker-pull-dev --> Skip this step if you want to use your local image
+make docker-start-dev --> Use TAG=local if you built the image locally
+make docker-enter-dev
+make build-robot-workspace
+source robot_ws/install/setup.bash
+make build-simulation-workspace
+source simulation_ws/install/setup.bash
+export SIMULATION=true
+export DEVELOPING=true
+roslaunch phoenix1_bringup bringup.launch
+
+```
+-  Attention developers
+```export TAG=develop``` will pull ```62427299064.dkr.ecr.ca-central-1.amazonaws.com/binders:cartpuller-dev-develop``` from AWS. If you used Jira to create a branch or the branch starts with feature, hotfix, bugfix, or release it will automatically build on the Jenkins pipeline. You can pull this image using: ```export TAG=feature-OCP-100-your-branch``` for the branch: ```feature/OCP-100-your-branch``` and then ```make docker-pull-dev```
+For this to work the jenkins build should have finished, otherwise you can `export TAG=develop` or `export TAG=master`
+[This is where it is used in Jenkins](https://bitbucket.org/ais_admin/cartpuller-binder/src/2591da86a867c2618c2454da26b7cc4eee9bd9a1/binder/jenkins/Jenkinsfile#lines-25) and [in the ais-makefile](https://bitbucket.org/ais_admin/ais-makefile/src/becabc1dd7adb917727dcb543dfd9e9a70a7f212/Makefile#lines-165)
+
+# Infrastructure
+The jenkinks server can be found in the following address `http://build.ais-api.com:8080/`
+
+# Note to ADE
+As of `2021-09-01` [ADE is compatible with Gitlab and Dockerhub registries](https://gitlab.com/ApexAI/ade-cli/-/blob/master/ade_cli/credentials.py#L90-100), to overcome this build the dev pipeline locally with
+```
+make docker-login # This command will log you inside the AWS ECR registry
+make src-update-submodules
+make docker-build-dev # Builds the development image
+```
+Or download it from the docker registry and tag it again
+```
+docker pull 062427299064.dkr.ecr.ca-central-1.amazonaws.com/binders:phoenix1-binder-dev
+docker tag 062427299064.dkr.ecr.ca-central-1.amazonaws.com/binders:phoenix1-binder-dev binders:phoenix1-binder-dev
+```
+
+Then use [ade](https://ade-cli.readthedocs.io/en/latest/#) as usual.  
