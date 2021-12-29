@@ -2,6 +2,8 @@
 # Development Workflow
 - Run these commands inside the phoenix binder folder:
 ```
+make src-update-submodules
+export TAG=latest
 make docker-start-dev
 make docker-enter-dev
 make build
