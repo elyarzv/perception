@@ -11,7 +11,12 @@ ENV WORKSPACE ${HOME_DIR}'/'${PROJECT}
 
 # Copy project
 ADD robot_ws ${WORKSPACE}/robot_ws
-RUN mkdir -p ${WORKSPACE}
+
+RUN /bin/bash -c ' \
+            . /opt/ros/noetic/setup.bash && \
+            cd ${WORKSPACE}/robot_ws/ && \
+            colcon build &&\
+            . ${WORKSPACE}/robot_ws/install/setup.bash'
 
 WORKDIR ${WORKSPACE}
 
