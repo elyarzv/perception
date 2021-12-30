@@ -6,7 +6,7 @@ make src-update-submodules
 export TAG=latest
 make docker-start-dev
 make docker-enter-dev
-make build
+make build-robot-workspace
 source devel/setup.bash
 ```
 - Stop the Docker container when you are done:
