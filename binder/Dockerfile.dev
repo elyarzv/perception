@@ -7,7 +7,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ARG PROJECT
 ENV HOME_DIR /root
-ENV WORKSPACE ${HOME_DIR}'/'${PROJECT}
+ENV WORKSPACE ${HOME_DIR}
 
 # Copy project
 ADD robot_ws ${WORKSPACE}/robot_ws
