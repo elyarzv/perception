@@ -7,3 +7,6 @@
 [submodule "binder/phoenix1-fleet-management"]
 	path = binder/phoenix1-fleet-management
 	url = git@bitbucket.org:ais_admin/phoenix1-fleet-management.git
+[submodule "binder/ais-makefile"]
+	path = binder/ais-makefile
+	url = git@bitbucket.org:ais_admin/ais-makefile.git
