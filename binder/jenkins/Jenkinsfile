@@ -58,8 +58,8 @@ pipeline {
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          make docker-build-prod
+          # make TAG="${TAG}"
+          # make docker-build-prod
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
@@ -76,8 +76,8 @@ pipeline {
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
           make TAG="${TAG}"
-          make docker-login
-          make docker-push-prod
+          # make docker-login
+          # make docker-push-prod
           '''
           sh '''#!/bin/bash
           make docker-stop-dev
@@ -86,89 +86,6 @@ pipeline {
           make docker-prune
           '''
         }
-      }
-    }
-stage('Unit Test') {
-      when {
-        anyOf { 
-          branch 'develop';
-          branch 'feature/*';
-          branch 'bugfix/*';
-          branch 'hotfix/*';
-          }
-      }
-      steps {
-        echo "Build number is ${currentBuild.number}"
-        withCredentials([
-          [
-            $class: 'AmazonWebServicesCredentialsBinding',
-            credentialsId: 'AIS-AWS',
-            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
-            stsTokenDuration: 7200
-          ]
-        ]) {
-          sh '''#!/bin/bash
-          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs
-          '''
-          sh '''#!/bin/bash
-          git submodule foreach "git fetch"
-          git submodule foreach "git lfs pull"
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          echo ${TAG}
-          make TAG="${TAG}"
-          make docker-login
-          make docker-pull-dev
-          make docker-start-gtest
-          sleep 10
-          make docker-run-g-test
-          '''
-        }
-      }
-    }
-stage('Sim Test') {
-      when {
-        anyOf { 
-          branch 'develop';
-          branch 'feature/*';
-          branch 'bugfix/*';
-          branch 'hotfix/*';
-          }
-      }
-      steps {
-      timeout(time: 10, unit: 'MINUTES') {
-        echo "Build number is ${currentBuild.number}"
-        withCredentials([
-          [
-            $class: 'AmazonWebServicesCredentialsBinding',
-            credentialsId: 'AIS-AWS',
-            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
-            stsTokenDuration: 7200
-          ]
-        ]) {
-          sh '''#!/bin/bash
-          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs
-          '''
-          sh '''#!/bin/bash
-          git submodule foreach "git fetch"
-          git submodule foreach "git lfs pull"
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          echo ${TAG}
-          make TAG="${TAG}"
-          make docker-login
-          make docker-pull-dev
-          make docker-start-headless
-          sleep 10
-          make docker-run-sim-test
-          make docker-stop-dev
-          '''
-        }
-      }
       }
     }
       stage('tag') {
@@ -210,8 +127,8 @@ stage('Sim Test') {
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          make docker-build-prod
+          # make TAG="${TAG}"
+          # make docker-build-prod
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
@@ -228,8 +145,8 @@ stage('Sim Test') {
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
           make TAG="${TAG}"
-          make docker-login
-          make docker-push-prod
+          # make docker-login
+          # make docker-push-prod
           '''
           sh '''#!/bin/bash
           make docker-stop-dev
@@ -282,8 +199,8 @@ stage('Sim Test') {
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          make docker-build-prod
+          # make TAG="${TAG}"
+          # make docker-build-prod
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
@@ -299,9 +216,9 @@ stage('Sim Test') {
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          make docker-login
-          make docker-push-prod
+          # make TAG="${TAG}"
+          # make docker-login
+          # make docker-push-prod
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
@@ -309,19 +226,19 @@ stage('Sim Test') {
           make TAG="${TAG}"
           make docker-login
           make docker-pull-dev
-          make docker-start-gtest
-          sleep 10
-          make docker-run-g-test
+          # make docker-start-gtest
+          # sleep 10
+          # make docker-run-g-test
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
           echo ${TAG}
-          make TAG="${TAG}"
-          make docker-login
-          make docker-pull-dev
-          make docker-start-headless
-          sleep 10
-          make docker-run-sim-test
+          # make TAG="${TAG}"
+          # make docker-login
+          # make docker-pull-dev
+          # make docker-start-headless
+          # sleep 10
+          # make docker-run-sim-test
           '''
           sh '''#!/bin/bash
           make docker-stop-dev
