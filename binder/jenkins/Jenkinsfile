@@ -5,7 +5,7 @@ pipeline {
       args '--user=root -v /var/run/docker.sock:/var/run/docker.sock'
       label 'linux' 
       }
-  }
+    }
   stages {
     stage('Build and Push') {
       when {
@@ -28,9 +28,19 @@ pipeline {
             secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
             stsTokenDuration: 7200
           ]
-        ]) {
+        ]) 
+        
+        {
           sh '''#!/bin/bash
-          apk add --update alpine-sdk && apk add libffi-dev openssl-dev && apk --no-cache --update add build-base
+          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs
+          '''
+          sh '''#!/bin/bash
+	        git submodule update --init --recursive
+          git submodule foreach "git fetch"
+          git submodule foreach "git lfs pull"
+          '''
+          sh '''#!/bin/bash
+          make docker-stop-dev
           '''
           sh '''#!/bin/bash
           make docker-prune
@@ -70,12 +80,97 @@ pipeline {
           make docker-push-prod
           '''
           sh '''#!/bin/bash
+          make docker-stop-dev
+          '''
+          sh '''#!/bin/bash
           make docker-prune
           '''
         }
       }
     }
-
+stage('Unit Test') {
+      when {
+        anyOf { 
+          branch 'develop';
+          branch 'feature/*';
+          branch 'bugfix/*';
+          branch 'hotfix/*';
+          }
+      }
+      steps {
+        echo "Build number is ${currentBuild.number}"
+        withCredentials([
+          [
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'AIS-AWS',
+            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+            stsTokenDuration: 7200
+          ]
+        ]) {
+          sh '''#!/bin/bash
+          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs
+          '''
+          sh '''#!/bin/bash
+          git submodule foreach "git fetch"
+          git submodule foreach "git lfs pull"
+          '''
+          sh '''#!/bin/bash
+          export TAG=`echo $GIT_BRANCH | tr / -`
+          echo ${TAG}
+          make TAG="${TAG}"
+          make docker-login
+          make docker-pull-dev
+          make docker-start-gtest
+          sleep 10
+          make docker-run-g-test
+          '''
+        }
+      }
+    }
+stage('Sim Test') {
+      when {
+        anyOf { 
+          branch 'develop';
+          branch 'feature/*';
+          branch 'bugfix/*';
+          branch 'hotfix/*';
+          }
+      }
+      steps {
+      timeout(time: 10, unit: 'MINUTES') {
+        echo "Build number is ${currentBuild.number}"
+        withCredentials([
+          [
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'AIS-AWS',
+            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+            stsTokenDuration: 7200
+          ]
+        ]) {
+          sh '''#!/bin/bash
+          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs
+          '''
+          sh '''#!/bin/bash
+          git submodule foreach "git fetch"
+          git submodule foreach "git lfs pull"
+          '''
+          sh '''#!/bin/bash
+          export TAG=`echo $GIT_BRANCH | tr / -`
+          echo ${TAG}
+          make TAG="${TAG}"
+          make docker-login
+          make docker-pull-dev
+          make docker-start-headless
+          sleep 10
+          make docker-run-sim-test
+          make docker-stop-dev
+          '''
+        }
+      }
+      }
+    }
       stage('tag') {
         when { buildingTag() }
         steps {
@@ -90,6 +185,16 @@ pipeline {
            ]
           ]) {
           sh '''#!/bin/bash
+          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs
+          '''
+          sh '''#!/bin/bash
+          git submodule foreach "git fetch"
+          git submodule foreach "git lfs pull"
+          '''
+          sh '''#!/bin/bash
+          make docker-stop-dev
+          '''
+          sh '''#!/bin/bash
           make docker-prune
           '''
           sh '''#!/bin/bash
@@ -125,6 +230,9 @@ pipeline {
           make TAG="${TAG}"
           make docker-login
           make docker-push-prod
+          '''
+          sh '''#!/bin/bash
+          make docker-stop-dev
           '''
           sh '''#!/bin/bash
           make docker-prune
@@ -149,7 +257,14 @@ pipeline {
           ]
         ]) {
           sh '''#!/bin/bash
-          apk add --update alpine-sdk && apk add libffi-dev openssl-dev && apk --no-cache --update add build-base
+          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs
+          '''
+          sh '''#!/bin/bash
+          git submodule foreach "git fetch"
+          git submodule foreach "git lfs pull"
+          '''
+          sh '''#!/bin/bash
+          make docker-stop-dev
           '''
           sh '''#!/bin/bash
           make docker-prune
@@ -189,6 +304,29 @@ pipeline {
           make docker-push-prod
           '''
           sh '''#!/bin/bash
+          export TAG=`echo $GIT_BRANCH | tr / -`
+          echo ${TAG}
+          make TAG="${TAG}"
+          make docker-login
+          make docker-pull-dev
+          make docker-start-gtest
+          sleep 10
+          make docker-run-g-test
+          '''
+          sh '''#!/bin/bash
+          export TAG=`echo $GIT_BRANCH | tr / -`
+          echo ${TAG}
+          make TAG="${TAG}"
+          make docker-login
+          make docker-pull-dev
+          make docker-start-headless
+          sleep 10
+          make docker-run-sim-test
+          '''
+          sh '''#!/bin/bash
+          make docker-stop-dev
+          '''
+          sh '''#!/bin/bash
           make docker-prune
           '''
         }
@@ -199,7 +337,6 @@ pipeline {
   post {
     always {
       echo currentBuild.currentResult
-      deleteDir() /* clean up our workspace */
       cleanWs()
     }
   }
