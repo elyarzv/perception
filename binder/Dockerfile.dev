@@ -15,6 +15,7 @@ ADD robot_ws ${WORKSPACE}/robot_ws
 RUN /bin/bash -c ' \
             . /opt/ros/noetic/setup.bash && \
             cd ${WORKSPACE}/robot_ws/ && \
+            rm -rf build install logs && \
             colcon build &&\
             . ${WORKSPACE}/robot_ws/install/setup.bash'
 
