@@ -89,7 +89,7 @@ pipeline {
       }
     }
       stage('tag') {
-        when { buildingTag() }
+        when { tag "v*" }
         steps {
           echo "Build number is ${currentBuild.number}"
           withCredentials([
