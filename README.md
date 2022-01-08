@@ -9,6 +9,7 @@ make docker-enter-dev
 make build-robot-workspace
 source devel/setup.bash
 ```
+
 - Stop the Docker container when you are done:
 ```
 make docker-stop-dev
@@ -126,4 +127,4 @@ docker pull 062427299064.dkr.ecr.ca-central-1.amazonaws.com/binders:phoenix1-bin
 docker tag 062427299064.dkr.ecr.ca-central-1.amazonaws.com/binders:phoenix1-binder-dev binders:phoenix1-binder-dev
 ```
 
-Then use [ade](https://ade-cli.readthedocs.io/en/latest/#) as usual.  
+Then use [ade](https://ade-cli.readthedocs.io/en/latest/#) as usual.
