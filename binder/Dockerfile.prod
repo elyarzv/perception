@@ -7,5 +7,5 @@ COPY --from=dev /opt/phoenix1-perception/ /opt/phoenix1-perception/
 
 # adding entery point
 COPY binder/prod/entrypoint /tmp/prod_entrypoint
-ENTRYPOINT ["/tmp/prod_entrypoint"]
+#ENTRYPOINT ["/tmp/prod_entrypoint"]
 CMD ["/bin/sh", "-c", "trap 'exit 147' TERM; tail -f /dev/null & wait ${!}"]
