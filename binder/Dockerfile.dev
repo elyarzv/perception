@@ -16,8 +16,8 @@ RUN /bin/bash -c ' \
             . /opt/ros/noetic/setup.bash && \
             cd ${WORKSPACE}/robot_ws/ && \
             rm -rf build install logs && \
-            colcon build &&\
-            . ${WORKSPACE}/robot_ws/install/setup.bash'
+            colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --merge-install --install-base /opt/${PROJECT} &&\
+            . /opt/${PROJECT}/setup.bash'
 
 WORKDIR ${WORKSPACE}
 

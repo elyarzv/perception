@@ -48,3 +48,12 @@ Thumbs.db
 *.mov
 *.wmv
 
+#Ignore system files
+.bash_history
+.ros/
+.viminfo
+#Ignore build folders
+robot_ws/build/
+robot_ws/install/
+robot_ws/log/
+
