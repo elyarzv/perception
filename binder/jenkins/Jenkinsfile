@@ -145,8 +145,8 @@ pipeline {
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
           make TAG="${TAG}"
-          # make docker-login
-          # make docker-push-prod
+          make docker-login
+          make docker-push-prod
           '''
           sh '''#!/bin/bash
           make docker-stop-dev
