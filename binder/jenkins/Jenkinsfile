@@ -127,8 +127,8 @@ pipeline {
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
-          # make TAG="${TAG}"
-          # make docker-build-prod
+          make TAG="${TAG}"
+          make docker-build-prod
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
