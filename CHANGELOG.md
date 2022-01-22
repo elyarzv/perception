@@ -2,7 +2,7 @@
 All notable changes to the project will be documented in this file.
 
 ## **Latest Released Version** 
-## [1.1.2] - 2022-01-17
+## [1.1.2] - 2022-01-21
 ### Added
  - Phoenix Perception Binder (PH-779)
  - Fine-tune rail-head detection for Houweling (PH-778)
