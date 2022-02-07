@@ -11,6 +11,3 @@
 [submodule "binder/ais-makefile"]
 	path = binder/ais-makefile
 	url = git@bitbucket.org:ais_admin/ais-makefile.git
-[submodule "robot_ws/src/perception_diagnostics"]
-	path = robot_ws/src/perception_diagnostics
-	url = git@bitbucket.org:ais_admin/perception_diagnostics.git
