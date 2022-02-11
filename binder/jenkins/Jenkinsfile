@@ -32,7 +32,7 @@ pipeline {
         
         {
           sh '''#!/bin/bash
-          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs
+          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs jq
           '''
           sh '''#!/bin/bash
 	        git submodule update --init --recursive
@@ -104,7 +104,7 @@ pipeline {
            ]
           ]) {
           sh '''#!/bin/bash
-          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs
+          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs jq
           '''
           sh '''#!/bin/bash
           git submodule foreach "git fetch"
@@ -179,7 +179,7 @@ pipeline {
           ]
         ]) {
           sh '''#!/bin/bash
-          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs
+          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs jq
           '''
           sh '''#!/bin/bash
           git submodule foreach "git fetch"
