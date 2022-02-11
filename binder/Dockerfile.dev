@@ -11,6 +11,7 @@ ENV WORKSPACE ${HOME_DIR}
 
 # Copy project
 ADD robot_ws ${WORKSPACE}/robot_ws
+ADD .git ${WORKSPACE}
 
 RUN /bin/bash -c ' \
             . /opt/ros/noetic/setup.bash && \
