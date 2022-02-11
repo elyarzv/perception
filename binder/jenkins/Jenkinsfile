@@ -65,12 +65,14 @@ pipeline {
           export TAG=`echo $GIT_BRANCH | tr / -`
           make TAG="${TAG}"
           make docker-login
+          make dockerhub-login
           make docker-push-base
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
           make TAG="${TAG}"
           make docker-login
+          make dockerhub-login
           make docker-push-dev
           '''
           sh '''#!/bin/bash
@@ -134,18 +136,21 @@ pipeline {
           export TAG=`echo $GIT_BRANCH | tr / -`
           make TAG="${TAG}"
           make docker-login
+          make dockerhub-login
           make docker-push-base
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
           make TAG="${TAG}"
           make docker-login
+          make dockerhub-login
           make docker-push-dev
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
           make TAG="${TAG}"
           make docker-login
+          make dockerhub-login
           make docker-push-prod
           '''
           sh '''#!/bin/bash
@@ -206,18 +211,21 @@ pipeline {
           export TAG=`echo $GIT_BRANCH | tr / -`
           make TAG="${TAG}"
           make docker-login
+          make dockerhub-login
           make docker-push-base
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
           make TAG="${TAG}"
           make docker-login
+          make dockerhub-login
           make docker-push-dev
           '''
           sh '''#!/bin/bash
           export TAG=`echo $GIT_BRANCH | tr / -`
           # make TAG="${TAG}"
           # make docker-login
+          # make dockerhub-login
           # make docker-push-prod
           '''
           sh '''#!/bin/bash
@@ -225,6 +233,7 @@ pipeline {
           echo ${TAG}
           make TAG="${TAG}"
           make docker-login
+          make dockerhub-login
           make docker-pull-dev
           # make docker-start-gtest
           # sleep 10
