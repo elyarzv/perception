@@ -62,7 +62,8 @@ RUN apt-get update && apt-get install -y \
     ros-noetic-ros-numpy \
     ros-noetic-tf2-sensor-msgs \
     python3-colcon-common-extensions \
-    ros-noetic-vision-msgs
+    ros-noetic-vision-msgs \
+    bash-completion
 
 RUN rosdep init
 RUN rosdep update
