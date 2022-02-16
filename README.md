@@ -8,6 +8,8 @@ make docker-start-dev
 make docker-enter-dev
 make build-robot-workspace
 source devel/setup.bash
+export export FIELD_NAME=SIM
+roslaunch phoenix_detection bringup.launch &
 ```
 
 - Stop the Docker container when you are done:
