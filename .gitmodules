@@ -4,6 +4,7 @@
 [submodule "robot_ws/src/phoenix1_perception"]
 	path = robot_ws/src/phoenix1_perception
 	url = git@bitbucket.org:ais_admin/phoenix1_perception.git
+    branch = master
 [submodule "binder/phoenix1-fleet-management"]
 	path = binder/phoenix1-fleet-management
 	url = git@bitbucket.org:ais_admin/phoenix1-fleet-management.git
@@ -11,3 +12,4 @@
 [submodule "binder/ais-makefile"]
 	path = binder/ais-makefile
 	url = git@bitbucket.org:ais_admin/ais-makefile.git
+    branch = master
