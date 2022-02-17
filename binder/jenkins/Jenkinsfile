@@ -1,112 +1,176 @@
-pipeline {
-  agent {
-    docker { 
+String cron_string = BRANCH_NAME == "develop" ? "0 10 * * *" : ""
+
+pipeline
+{
+  agent
+  {
+    docker
+    { 
       image 'bentolor/docker-dind-awscli:2.3.4'
       args '--user=root -v /var/run/docker.sock:/var/run/docker.sock'
       label 'linux' 
+    }
+  }
+  triggers { cron(cron_string) }
+  stages
+  {
+    stage('Build')
+    {
+      when
+      {
+        anyOf
+        { 
+          branch 'main'; 
+          branch 'develop'; 
+          branch 'feature/*'
+          branch 'hotfix/*'
+          branch 'bugfix/*'
+          branch 'release/*'
+          branch 'test/*'
+        }
+      }
+      steps
+      {
+        echo "Build number is ${currentBuild.number}"
+        bitbucketStatusNotify(buildState: 'INPROGRESS')
+        notifyBuild('STARTED') 
+        
+        echo "Building"
+        sh '''#!/bin/bash
+        apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs jq
+        '''
+        sh '''#!/bin/bash
+        git submodule update --init --recursive
+        git submodule foreach "git fetch"
+        git submodule foreach "git lfs pull"
+        '''
+        sh '''#!/bin/bash
+        make docker-stop-dev
+        '''
+        sh '''#!/bin/bash
+        make docker-prune
+        '''
+        sh '''#!/bin/bash
+        export TAG=`echo $GIT_BRANCH | tr / -`
+        echo ${TAG}
+        make TAG="${TAG}"
+        make docker-build-base
+        '''
+        sh '''#!/bin/bash
+        export TAG=`echo $GIT_BRANCH | tr / -`
+        make TAG="${TAG}"
+        make docker-build-dev
+        '''
+        sh '''#!/bin/bash
+        export TAG=`echo $GIT_BRANCH | tr / -`
+        make TAG="${TAG}"
+        make docker-build-prod
+        '''
       }
     }
-  stages {
-    stage('Build and Push') {
-      when {
-        anyOf { 
+    stage('Test')
+    {
+      when
+      {
+        anyOf
+        { 
           branch 'main'; 
-          branch 'develop';
-          branch 'feature/*';
-          branch 'bugfix/*';
-          branch 'hotfix/*';
+          branch 'develop'; 
+          branch 'feature/*'
+          branch 'hotfix/*'
+          branch 'bugfix/*'
           branch 'release/*'
-          }
+          branch 'test/*'
+        }
       }
-      steps {
-        echo "Build number is ${currentBuild.number}"
-        withCredentials([
+      steps
+      {
+        echo "Testing"
+      }
+    }
+    stage('Deploy')
+    {
+      when
+      {
+        anyOf
+        { 
+          branch 'main'; 
+          branch 'develop'; 
+          branch 'feature/*'
+          branch 'hotfix/*'
+          branch 'bugfix/*'
+          branch 'release/*'
+          branch 'test/*'
+        }
+      }
+      steps
+      {
+        script
+        {
+          withCredentials([
           [
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'AIS-AWS',
             accessKeyVariable: 'AWS_ACCESS_KEY_ID',
             secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
             stsTokenDuration: 7200
-          ]
+          ]])
+          {
+            echo "Deploying"
+            sh '''#!/bin/bash
+            export TAG=`echo $GIT_BRANCH | tr / -`
+            make TAG="${TAG}"
+            make docker-login
+            make dockerhub-login
+            make docker-push-base
+            '''
+            sh '''#!/bin/bash
+            export TAG=`echo $GIT_BRANCH | tr / -`
+            make TAG="${TAG}"
+            make docker-login
+            make docker-push-dev
+            '''
+            sh '''#!/bin/bash
+            export TAG=`echo $GIT_BRANCH | tr / -`
+            make TAG="${TAG}"
+            make docker-login
+            make dockerhub-login
+            make docker-push-prod
+            '''
+            sh '''#!/bin/bash
+            make docker-stop-dev
+            '''
+            sh '''#!/bin/bash
+            make docker-prune
+            '''
+          }
+        }
+      }
+    }
+    stage('Tag')
+    {
+      when
+      {
+        buildingTag()
+      }
+      steps
+      {
+        echo "Build number is ${currentBuild.number}"
+        withCredentials([
+        [
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'AIS-AWS',
+          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+          stsTokenDuration: 7200
+        ]
         ]) 
-        
         {
           sh '''#!/bin/bash
           apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs jq
           '''
           sh '''#!/bin/bash
-	        git submodule update --init --recursive
-          git submodule foreach "git fetch"
-          git submodule foreach "git lfs pull"
-          '''
-          sh '''#!/bin/bash
-          make docker-stop-dev
-          '''
-          sh '''#!/bin/bash
-          make docker-prune
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          echo ${TAG}
-          make TAG="${TAG}"
-          make docker-build-base
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          make docker-build-dev
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          # make TAG="${TAG}"
-          # make docker-build-prod
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          make docker-login
-          make dockerhub-login
-          make docker-push-base
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          make docker-login
-          make dockerhub-login
-          make docker-push-dev
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          # make docker-login
-          # make docker-push-prod
-          '''
-          sh '''#!/bin/bash
-          make docker-stop-dev
-          '''
-          sh '''#!/bin/bash
-          make docker-prune
-          '''
-        }
-      }
-    }
-      stage('tag') {
-        when { tag 'v*' }
-        steps {
-          echo "Build number is ${currentBuild.number}"
-          withCredentials([
-            [
-              $class: 'AmazonWebServicesCredentialsBinding',
-              credentialsId: 'AIS-AWS',
-              accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-              secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
-              stsTokenDuration: 7200
-           ]
-          ]) {
-          sh '''#!/bin/bash
-          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs jq
-          '''
-          sh '''#!/bin/bash
+          git submodule update --init --recursive
           git submodule foreach "git fetch"
           git submodule foreach "git lfs pull"
           '''
@@ -154,121 +218,74 @@ pipeline {
           make docker-push-prod
           '''
           sh '''#!/bin/bash
-          make docker-stop-dev
-          '''
-          sh '''#!/bin/bash
-          make docker-prune
-          '''
-        }
-       }
-    }
-
-    stage('Pull requests') {
-      when {
-        branch 'PR-*'
-      }
-      steps {
-        echo "Build number is ${currentBuild.number}"
-        withCredentials([
-          [
-            $class: 'AmazonWebServicesCredentialsBinding',
-            credentialsId: 'AIS-AWS',
-            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
-            stsTokenDuration: 7200
-          ]
-        ]) {
-          sh '''#!/bin/bash
-          apk add --update alpine-sdk && apk add --no-cache --update libffi-dev openssl-dev build-base git git-lfs jq
-          '''
-          sh '''#!/bin/bash
-          git submodule foreach "git fetch"
-          git submodule foreach "git lfs pull"
-          '''
-          sh '''#!/bin/bash
-          make docker-stop-dev
-          '''
-          sh '''#!/bin/bash
-          make docker-prune
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          echo ${TAG}
-          make TAG="${TAG}"
-          make docker-build-base
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          make docker-build-dev
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          # make TAG="${TAG}"
-          # make docker-build-prod
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          make docker-login
-          make dockerhub-login
-          make docker-push-base
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          make TAG="${TAG}"
-          make docker-login
-          make dockerhub-login
-          make docker-push-dev
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          # make TAG="${TAG}"
-          # make docker-login
-          # make dockerhub-login
-          # make docker-push-prod
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          echo ${TAG}
-          make TAG="${TAG}"
-          make docker-login
-          make dockerhub-login
-          make docker-pull-dev
-          # make docker-start-gtest
-          # sleep 10
-          # make docker-run-g-test
-          '''
-          sh '''#!/bin/bash
-          export TAG=`echo $GIT_BRANCH | tr / -`
-          echo ${TAG}
-          # make TAG="${TAG}"
-          # make docker-login
-          # make docker-pull-dev
-          # make docker-start-headless
-          # sleep 10
-          # make docker-run-sim-test
-          '''
-          sh '''#!/bin/bash
-          make docker-stop-dev
-          '''
-          sh '''#!/bin/bash
           make docker-prune
           '''
         }
       }
-    }
+    } 
   }
 
-  post {
-    always {
+
+  post
+  {
+    success
+    {
+      bitbucketStatusNotify(buildState: 'SUCCESSFUL')
+      notifyBuild('SUCCESSFUL')
+    }
+    failure
+    {
+      bitbucketStatusNotify(buildState: 'FAILED')
+      notifyBuild('FAILURE')
+    }
+    always
+    {
       echo currentBuild.currentResult
-      cleanWs()
+      sh '''#!/bin/bash
+      docker system prune --all --force --volumes
+      '''
+      sh "chmod -R 777 ."
+      cleanWs ( cleanWhenNotBuilt: false,
+                deleteDirs: true,
+                disableDeferredWipeout: true,
+                notFailBuild: true,
+                patterns: [[pattern: '.gitignore', type: 'INCLUDE']]
+              )
     }
   }
 
-  options {
+  options
+  {
     buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5'))
     disableConcurrentBuilds()
   }
+}
+
+def notifyBuild(String buildStatus = 'STARTED') {
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+  def summary = "${subject} (${env.BUILD_URL})"
+  def details = """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+    <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>"""
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED') {
+    color = 'YELLOW'
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESSFUL') {
+    color = 'GREEN'
+    colorCode = '#00FF00'
+  } else {
+    color = 'RED'
+    colorCode = '#FF0000'
+  }
+
+  // Send notifications
+  slackSend (channel: "#phoenix-perception-binder", color: colorCode, message: summary)
+
 }
